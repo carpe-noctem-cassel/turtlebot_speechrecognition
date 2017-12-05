@@ -1,0 +1,8 @@
+#JSGF V1.0;
+
+grammar test;
+
+public <command> = turtle bot go (<location> | <movement>);
+
+private <location> = to (the lab | the kitchen);
+private <movement> = forward | backwards;

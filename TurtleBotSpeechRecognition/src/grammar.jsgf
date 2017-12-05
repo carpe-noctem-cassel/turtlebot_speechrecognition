@@ -1,0 +1,7 @@
+#JSGF V1.0;
+
+grammar com.acme.politeness;
+
+// Body
+public <goto> = (go to);
+public <location> = (the lab);
