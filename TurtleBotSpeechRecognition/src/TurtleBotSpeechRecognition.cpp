@@ -12,6 +12,7 @@
 #include <sphinxbase/jsgf.h>
 #include <sphinxbase/ad.h>
 #include <sphinxbase/err.h>
+#include <inttypes.h>
 
 using namespace std;
 
@@ -102,6 +103,32 @@ int32 k;
 //    ad_close(ad);
 //}
 
+void send_ros_command(char const* hyp) {
+
+}
+
+
+void extract_command(char const* hyp, int32 score) {
+	if(score > -6000) {
+		if((strcmp (hyp,"turtle bot go to the lab") == 0)) {
+			printf("COMMAND LAB\n");
+			send_ros_command(hyp);
+		} else if((strcmp (hyp,"turtle bot go to the kitchen") == 0)) {
+			printf("COMMAND KITCHEN\n");
+			send_ros_command(hyp);
+		} else if((strcmp (hyp,"turtle bot go forward") == 0)) {
+			printf("COMMAND FORWARD\n");
+			send_ros_command(hyp);
+		} else if((strcmp (hyp,"turtle bot go to the backwards") == 0)) {
+			printf("COMMAND BACKWARDS\n");
+			send_ros_command(hyp);
+		} else {
+			printf("ABSOLUTE MIND FUCK\n");
+		}
+	} else {
+		printf("COMMAND DENIED\n");
+	}
+}
 
 string recognize_from_microphone() {
 	ad_start_rec(ad);
@@ -109,26 +136,58 @@ string recognize_from_microphone() {
 	utt_started = FALSE;
 
 	while(1) {
-		k = ad_read(ad, adbuf, 4096);
-		ps_process_raw(ps, adbuf, k, FALSE, FALSE);
+
+		printf("\n\n");
+		fflush(stdout);
+
+		k = ad_read(ad, adbuf, 4096); //blockiert
+		int rawCode = ps_process_raw(ps, adbuf, k, FALSE, FALSE);
+
+
+		printf("Raw Code: %d\n", rawCode);
+		fflush(stdout);
+
 
 		in_speech = ps_get_in_speech(ps);
 
+
+		printf("Read: %d", in_speech);
+		fflush(stdout);
+
 		if(in_speech && !utt_started) {
+			printf("if (in_speeach) !\n");
+			fflush(stdout);
 			utt_started = TRUE;
 		}
 
 		if(!in_speech && utt_started) {
 			ps_end_utt(ps);
 			ad_stop_rec(ad);
-			hyp = ps_get_hyp(ps, NULL);
+
+			utt_started = FALSE;
+
+			int32 score = 30;
+
+
+			hyp = ps_get_hyp(ps, &score);
+
+
+
+			printf("if (!!!!in_speech)!\n %s", hyp);
+
+			printf("\n");
+
+			printf("SCORE %d\n",score);
+			fflush(stdout);
+
+			extract_command(hyp, score);
+
 			return hyp;
 
 			break;
 		}
 	}
 }
-
 
 int main(int argc, char *argv[]) {
 
@@ -144,6 +203,7 @@ int main(int argc, char *argv[]) {
 				"Failed to create config object, see log for details\n");
 		return -1;
 	}
+		fflush(stdout);
 
 	ps = ps_init(config);
 	if (ps == NULL) {
