@@ -25,7 +25,7 @@ int rv;
 int32 score;
 
 ad_rec_t *ad;
-int16 adbuf[4096];
+int16 adbuf[1024];
 uint8 utt_started, in_speech;
 int32 k;
 
@@ -109,22 +109,47 @@ void send_ros_command(char const* hyp) {
 
 
 void extract_command(char const* hyp, int32 score) {
-	if(score > -6000) {
-		if((strcmp (hyp,"turtle bot go to the lab") == 0)) {
-			printf("COMMAND LAB\n");
-			send_ros_command(hyp);
-		} else if((strcmp (hyp,"turtle bot go to the kitchen") == 0)) {
-			printf("COMMAND KITCHEN\n");
-			send_ros_command(hyp);
-		} else if((strcmp (hyp,"turtle bot go forward") == 0)) {
-			printf("COMMAND FORWARD\n");
-			send_ros_command(hyp);
-		} else if((strcmp (hyp,"turtle bot go to the backwards") == 0)) {
-			printf("COMMAND BACKWARDS\n");
-			send_ros_command(hyp);
-		} else {
-			printf("ABSOLUTE MIND FUCK\n");
-		}
+	if(hyp == NULL) {
+		return;
+	}
+//
+//public <command> = turtle bot go (<location> | <movement>);
+//
+//private <location> = to (the lab | the kitchen);
+//private <movement> = forward | backwards;
+
+	if(score > -8000) {
+//		if((strcmp (hyp,"turtle bot go to the lab") == 0)) {
+//			printf("COMMAND LAB\n");
+//			send_ros_command(hyp);
+//		} else if((strcmp (hyp,"turtle bot go to the kitchen") == 0)) {
+//			printf("COMMAND KITCHEN\n");
+//			send_ros_command(hyp);
+//		} else if((strcmp (hyp,"turtle bot go forward") == 0)) {
+//			printf("COMMAND FORWARD\n");
+//			send_ros_command(hyp);
+//		} else if((strcmp (hyp,"turtle bot go backwards") == 0)) {
+//			printf("COMMAND BACKWARDS\n");
+//			send_ros_command(hyp);
+//		} else {
+//			printf("ABSOLUTE MIND FUCK\n");
+//		}
+
+		if((strcmp (hyp,"go lab") == 0)) {
+				printf("COMMAND LAB\n");
+				send_ros_command(hyp);
+			} else if((strcmp (hyp,"go kitchen") == 0)) {
+				printf("COMMAND KITCHEN\n");
+				send_ros_command(hyp);
+			} else if((strcmp (hyp,"go forward") == 0)) {
+				printf("COMMAND FORWARD\n");
+				send_ros_command(hyp);
+			} else if((strcmp (hyp,"go backwards") == 0)) {
+				printf("COMMAND BACKWARDS\n");
+				send_ros_command(hyp);
+			} else {
+				printf("ABSOLUTE MIND FUCK\n");
+			}
 	} else {
 		printf("COMMAND DENIED\n");
 	}
@@ -137,55 +162,47 @@ string recognize_from_microphone() {
 
 	while(1) {
 
-		printf("\n\n");
-		fflush(stdout);
+		try {;
 
-		k = ad_read(ad, adbuf, 4096); //blockiert
-		int rawCode = ps_process_raw(ps, adbuf, k, FALSE, FALSE);
+			k = ad_read(ad, adbuf, 1024); //blockiert
+			int rawCode = ps_process_raw(ps, adbuf, k, FALSE, FALSE);
+
+			in_speech = ps_get_in_speech(ps);
+
+			if(in_speech && !utt_started) {
+				utt_started = TRUE;
+			}
+
+			if(!in_speech && utt_started) {
+				ps_end_utt(ps);
+				ad_stop_rec(ad);
+
+				utt_started = FALSE;
+
+				int32 score = 30;
 
 
-		printf("Raw Code: %d\n", rawCode);
-		fflush(stdout);
+				hyp = ps_get_hyp(ps, &score);
 
+				printf("SCORE %d\n",score);
+				fflush(stdout);
 
-		in_speech = ps_get_in_speech(ps);
+				extract_command(hyp, score);
 
+				return hyp;
 
-		printf("Read: %d", in_speech);
-		fflush(stdout);
+				break;
+			}
 
-		if(in_speech && !utt_started) {
-			printf("if (in_speeach) !\n");
+		} catch (const std::exception& e) {
+			printf("Exception caught.\n\n");
 			fflush(stdout);
-			utt_started = TRUE;
-		}
-
-		if(!in_speech && utt_started) {
-			ps_end_utt(ps);
-			ad_stop_rec(ad);
-
-			utt_started = FALSE;
-
-			int32 score = 30;
-
-
-			hyp = ps_get_hyp(ps, &score);
-
-
-
-			printf("if (!!!!in_speech)!\n %s", hyp);
-
-			printf("\n");
-
-			printf("SCORE %d\n",score);
-			fflush(stdout);
-
-			extract_command(hyp, score);
-
-			return hyp;
-
+			return "";
 			break;
 		}
+
+
+
 	}
 }
 

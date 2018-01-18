@@ -2,7 +2,7 @@
 
 grammar test;
 
-public <command> = turtle bot go (<location> | <movement>);
+public <command> = go (<location> | <movement>);
 
-private <location> = to (the lab | the kitchen);
+private <location> = lab | kitchen;
 private <movement> = forward | backwards;
