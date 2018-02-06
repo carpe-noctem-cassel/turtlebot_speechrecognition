@@ -1,0 +1,2 @@
+speechrecognition
+-DCATKIN_DEVEL_PREFIX=/home/lab-user/Desktop/test_ros/devel -DCMAKE_INSTALL_PREFIX=/home/lab-user/Desktop/test_ros/install -G Unix Makefiles

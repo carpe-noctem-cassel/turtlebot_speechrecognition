@@ -1,0 +1,8 @@
+prefix=/home/lab-user/Desktop/test_ros/devel
+
+Name: speechrecognition
+Description: Description of speechrecognition
+Version: 0.0.0
+Cflags: -I/home/lab-user/Desktop/test_ros/devel/include
+Libs: -L/home/lab-user/Desktop/test_ros/devel/lib 
+Requires: 

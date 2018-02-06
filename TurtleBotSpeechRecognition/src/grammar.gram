@@ -1,8 +1,0 @@
-#JSGF V1.0;
-
-grammar test;
-
-public <command> = go (<location> | <movement>);
-
-private <location> = lab | kitchen;
-private <movement> = forward | backwards;
